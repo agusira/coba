@@ -2,7 +2,7 @@
 FROM golang:alpine AS builder
 RUN apk --update add ca-certificates
 WORKDIR /app
-COPY . ./
+COPY . .
 RUN go mod tidy -diff
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o gatus .
 
