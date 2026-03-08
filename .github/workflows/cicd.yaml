@@ -40,8 +40,8 @@ env:
   ECS_TASK_DEFINITION: .aws/leantime.json # set this to the path to your Amazon ECS task definition
   ECS_TASK_DEFINITION_GATUS: .aws/gatus.json # set this to the path to your Amazon ECS task definition
                                                # file, e.g. .aws/task-definition.json
-  CONTAINER_NAME: lks-leantime-app           # set this to the name of the container in the
-  CONTAINER_NAME_GATUS: lks-gatus-app           # set this to the name of the container in the
+  CONTAINER_NAME: leantime           # set this to the name of the container in the
+  CONTAINER_NAME_GATUS: gatus           # set this to the name of the container in the
                                                # containerDefinitions section of your task definition
 
 permissions:
