@@ -41,7 +41,7 @@ env:
   ECS_TASK_DEFINITION_GATUS: .aws/gatus.json # set this to the path to your Amazon ECS task definition
                                                # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: lks-leantime-app           # set this to the name of the container in the
-  CONTAINER_NAME_GATUS: lks-leantime-gatus           # set this to the name of the container in the
+  CONTAINER_NAME_GATUS: lks-gatus-app           # set this to the name of the container in the
                                                # containerDefinitions section of your task definition
 
 permissions:
@@ -83,6 +83,22 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ${{ env.ECS_TASK_DEFINITION }}
+        container-name: ${{ env.CONTAINER_NAME }}
+        image: ${{ steps.build-image.outputs.image }}
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ${{ env.ECS_SERVICE }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        wait-for-service-stability: true
+
   deploy2:
     name: Deploy Gatus
     runs-on: ubuntu-latest
@@ -117,3 +133,19 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_GATUS:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY_GATUS:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY_GATUS:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ${{ env.ECS_TASK_DEFINITION_GATUS }}
+        container-name: ${{ env.CONTAINER_NAME_GATUS }}
+        image: ${{ steps.build-image.outputs.image }}
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ${{ env.ECS_SERVICE_GATUS }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        wait-for-service-stability: true
